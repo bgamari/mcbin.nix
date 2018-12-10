@@ -37,10 +37,10 @@ let
         "setenv devicetree_addr 0x1000000"
         "setenv kernel_addr 0x2000000"
         "setenv initrd_addr 0x6000000"
-        "ext4load mmc 0 \${kernel_addr} \${kernel_image}"
-        "ext4load mmc 0 \${devicetree_addr} \${devicetree_image}"
-        "ext4load mmc 0 \${initrd_addr} \${initrd_image}"
-        "setenv bootargs earlycon=uart8250,mmio32,0xf0512000 console=ttyS0,115200n8 root=/dev/mmcblk0p2 init=\${toplevel}/init \${extra_kernel_args}"
+        "ext4load mmc 1:3 \${kernel_addr} \${kernel_image}"
+        "ext4load mmc 1:3 \${devicetree_addr} \${devicetree_image}"
+        "ext4load mmc 1:3 \${initrd_addr} \${initrd_image}"
+        "setenv bootargs earlycon=uart8250,mmio32,0xf0512000 console=ttyS0,115200n8 root=/dev/mmcblk1p3 init=\${toplevel}/init \${extra_kernel_args}"
         "booti $kernel_addr $initrd_addr $fdt_addr"
       ];
 

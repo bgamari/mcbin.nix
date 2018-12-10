@@ -37,7 +37,7 @@
   };
   
   fileSystems."/mnt/ext" = {
-    device = '' UUID="83a77874-a246-409a-93e7-1c8b4efa28ce" '';
+    device = "/dev/sda1";
     neededForBoot = true;
   };
 
