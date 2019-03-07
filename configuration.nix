@@ -15,7 +15,7 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "17.09"; # Did you read the comment?
+  system.stateVersion = "18.09"; # Did you read the comment?
 
   environment.noXlibs = true;
   fonts.fontconfig.enable = false;
@@ -26,7 +26,12 @@
   programs.command-not-found.enable = false;
   users.users.root.initialHashedPassword = "";
 
+  environment.systemPackages = with pkgs; [
+    vim ethtool
+  ];
+
   networking.hostName = "mbin";
+  networking.useNetworkd = true;
   services.openssh.enable = true;
   services.avahi = {
     enable = true;
