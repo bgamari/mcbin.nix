@@ -3,27 +3,35 @@
 let
   kernel = {
     nixpkgs.overlays = [ (self: super: {
-      linux-marvell-armada = self.buildLinux rec {
-        src = self.fetchFromGitHub {
-          owner = "MarvellEmbeddedProcessors";
-          repo = "linux-marvell";
-          rev = "e5eb5621863c2566b58c2ac0c2bc9edfd895420d";
-          sha256 = "1m2qn1hvpfa5n7zn9g0cabayjwvx7w5l99bajsgn73z7xwfx85n7";
-        };
-        modDirVersion = "4.14.22-armada-18.09.3";
-        version = modDirVersion;
-        enableParallelBuilding = true;
-        kernelPatches = [];
-        defconfig = "mvebu_v8_lsp_defconfig";
-        extraConfig = ''
-          MTD_NAND_CAFE N
-        '';
-          #ARMV8_DEPRECATED Y
-      };
+      linux-marvell-armada = (import ./marvell-kernel.nix);
     }) ];
-    #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada;
+    #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
 
-    boot.kernelPackages = pkgs.linuxPackages_4_18;
+    #boot.kernelPackages = pkgs.linuxPackages_4_18;
+    boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux.overrideAttrs (oldAttrs: {
+      src = pkgs.fetchFromGitHub {
+        owner = "torvalds";
+        repo = "linux";
+        rev = "1c163f4c7b3f621efff9b28a47abb36f7378d783";
+        sha256 = "0000000000000000000000000000000000000000000000000000000000000000";
+      };
+    }));
+
+    boot.kernelPatches = [
+      {
+        name = "mbin-config";
+        patch = null;
+        extraConfig = ''
+          MDIO_I2C=y
+          MVMDIO=y
+          OF_MDIO=y
+          PHY_MVEBU_CP110_COMPHY=y
+          MVPP2=y
+          SFP=y
+          MARVELL_10G=y
+        '';
+      }
+    ];
   };
 
   bootloader =
