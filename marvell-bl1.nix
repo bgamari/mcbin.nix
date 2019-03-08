@@ -1,4 +1,4 @@
-{ stdenv, fetchFromGitHub, openssl, ubootBin }:
+{ stdenv, fetchFromGitHub, buildPackages, openssl, ubootBin }:
 
 # Installation:
 #
@@ -13,24 +13,24 @@ let
     name = "mss";
     owner = "MarvellEmbeddedProcessors";
     repo = "binaries-marvell";
-    rev = "14481806e699dcc6f7025dbe3e46cf26bb787791";
-    sha256 = "1l7cgyzy6rbmmyb1510rvdw0fq51hjcck55d069gs36f50yxh6ka";
+    rev = "c6c529ea3d905a28cc77331964c466c3e2dc852e";
+    sha256 = "02r13r7qffbcm85ibmq13z5g0a4sxn05ak6a4s61nswww1y89hyd";
   };
 
   atf = fetchFromGitHub {
     name = "atf";
     owner = "MarvellEmbeddedProcessors";
     repo = "atf-marvell";
-    rev = "711ecd32afe465b38052b5ba374c825b158eea18";
-    sha256 = "0h4bby04j339cr89mgcy286kvnmj7waikv6xknpianncdagzvl7m";
+    rev = "1f8ca7e01d4ac7023aea0eeb4c8a4b98dcf05760";
+    sha256 = "1ldiak6x7agdfqkx0x8zz96653kg9pjsahjnxl3159xa66b4fn2l";
   };
 
   ddr = fetchFromGitHub {
     name = "ddr";
     owner = "MarvellEmbeddedProcessors";
     repo = "mv-ddr-marvell";
-    rev = "99d772547314f84921268d57e53d8769197d3e21";
-    sha256 = "0ysmj9sj0gcbg0im4xizwfjy13nrjvrsay3hh5p42q9760ndzvkr";
+    rev = "618dadd1491eb2f7b2fd74313c04f7accddae475";
+    sha256 = "1zj4xg6cmlq13yy2h68z4jxsq6vr7wz5ljm15f26g3cawq7545xq";
   };
 
 in stdenv.mkDerivation {
@@ -39,7 +39,8 @@ in stdenv.mkDerivation {
   sourceRoot = "atf";
   hardeningDisable = [ "all" ];
   enableParallelBuilding = true;
-  buildInputs = [ openssl ];
+  nativeBuildInputs = [ openssl ];
+  patches = [ ./atf-fix-openssl-includes.patch ];
   postPatch = ''
     # the mv_ddr build system tries to create mv_ddr_build_message.c
     chmod ugo+w ../ddr
@@ -49,9 +50,18 @@ in stdenv.mkDerivation {
   buildFlags = [
     "USE_COHERENT_MEM=0" "LOG_LEVEL=20" "PLAT=a80x0_mcbin"
     "BL33=${ubootBin}"
-    "SCP_BL2=../mss/mrvl_scp_bl2_mss_ap_cp1_a8040.img"
+    "SCP_BL2=../mss/mrvl_scp_bl2.img"
+    "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
+    "HOSTCC=${buildPackages.stdenv.cc}/bin/gcc"
+    "V=1"
+    "OPENSSL_INCLUDES=-I${buildPackages.openssl.dev}/include"
+    "OPENSSL_LIBS=-L${buildPackages.openssl.out}/lib"
     "all" "fip"
   ];
+  #buildPhase = ''
+  #  make $buildFlags all
+  #  make $buildFlags OPENSSL_INCLUDES="-I${buildPackages.openssl.dev}/include" fip
+  #'';
   installPhase = ''
     mkdir -p $out
     cp -r build/a80x0_mcbin/release/* $out

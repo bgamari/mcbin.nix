@@ -1,0 +1,55 @@
+diff --git a/tools/doimage/Makefile b/tools/doimage/Makefile
+index bc74369f..2353eae5 100644
+--- a/tools/doimage/Makefile
++++ b/tools/doimage/Makefile
+@@ -25,7 +25,8 @@ CFLAGS += ${DOIMAGE_CC_FLAGS}
+ # could get pulled in from firmware tree.
+ INCLUDE_PATHS = -I.
+ 
+-CC := gcc
++HOSTCC ?= gcc
++
+ RM := rm -rf
+ 
+ .PHONY: all clean
+@@ -34,14 +35,16 @@ all: ${PROJECT}
+ 
+ ${PROJECT}: ${OBJECTS} Makefile
+ 	@echo "  LD      $@"
+-	${Q}${CC} ${OBJECTS} ${DOIMAGE_LD_FLAGS} -o $@
++	${Q}${HOSTCC} ${OBJECTS} ${DOIMAGE_LD_FLAGS} -o $@
+ 	@echo
+ 	@echo "Built $@ successfully"
+ 	@echo
+ 
++doimage.o: CC=${HOSTCC}
++
+ %.o: %.c %.h Makefile
+ 	@echo "  CC      $<"
+-	${Q}${CC} -c ${CFLAGS} ${INCLUDE_PATHS} $< -o $@
++	${Q}${HOSTCC} -c ${CFLAGS} ${INCLUDE_PATHS} $< -o $@
+ 
+ clean:
+ 	${Q}${RM} ${PROJECT}
+diff --git a/tools/fiptool/Makefile b/tools/fiptool/Makefile
+index e0e39236..1aa37322 100644
+--- a/tools/fiptool/Makefile
++++ b/tools/fiptool/Makefile
+@@ -37,7 +37,7 @@ all: ${PROJECT} fip_create
+ 
+ ${PROJECT}: ${OBJECTS} Makefile
+ 	@echo "  LD      $@"
+-	${Q}${HOSTCC} ${OBJECTS} -o $@ ${LDLIBS}
++	${Q}${HOSTCC} ${OBJECTS} ${OPENSSL_LIBS} -o $@ ${LDLIBS}
+ 	@${ECHO_BLANK_LINE}
+ 	@echo "Built $@ successfully"
+ 	@${ECHO_BLANK_LINE}
+@@ -48,7 +48,7 @@ fip_create: fip_create.sh
+ 
+ %.o: %.c %.h Makefile
+ 	@echo "  CC      $<"
+-	${Q}${HOSTCC} -c ${CPPFLAGS} ${CFLAGS} ${INCLUDE_PATHS} $< -o $@
++	${Q}${HOSTCC} -c ${CPPFLAGS} ${CFLAGS} ${INCLUDE_PATHS} ${OPENSSL_INCLUDES} $< -o $@
+ 
+ clean:
+ 	$(call SHELL_DELETE_ALL, ${PROJECT} ${OBJECTS} fip_create)

@@ -9,6 +9,8 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./mcbin.nix
+          # Build config.system.build.sdImage
+      (import ./nixpkgs/nixos/modules/installer/cd-dvd/sd-image.nix)
     ];
 
   # This value determines the NixOS release with which your system is to be
@@ -17,6 +19,10 @@
   # should.
   system.stateVersion = "18.09"; # Did you read the comment?
 
+  nixpkgs.crossSystem = {
+    config = "aarch64-unknown-linux-gnu";
+    system = "aarch64-linux";
+  };
   environment.noXlibs = true;
   fonts.fontconfig.enable = false;
   services.udisks2.enable = false;
