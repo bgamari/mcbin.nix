@@ -7,17 +7,17 @@ let
     "ext4load mmc 1:1 \${kernel_addr} \${kernel_image}"
     "ext4load mmc 1:1 \${devicetree_addr} \${devicetree_image}"
     "ext4load mmc 1:1 \${ramdisk_addr} \${ramdisk_image}"
-    "setenv bootargs console=ttyPS0,115200n8 root=/dev/mmcblk0p2 init=\${toplevel}/init \${extra_kernel_args}"
+    "setenv bootargs console=ttyS0,115200n8 root=/dev/mmcblk0p2 init=\${toplevel}/init \${extra_kernel_args}"
     "bootm \${kernel_addr} \${devicetree_addr} \${ramdisk_addr}]"
   ];
 
   uEnv = ''
     toplevel=${config.system.build.toplevel}
     extra_kernel_args=
-    kernel_addr=
-    kernel_image=uImage
-    devicetree_addr=
-    devicetree_image=marvell-armada8k.dtb
+    kernel_addr=0x2000000
+    kernel_image=Image
+    devicetree_addr=0x1000000
+    devicetree_image=armada-8040-mcbin.dtb
     ramdisk_image=initrd
     bootcmd=${pkgs.lib.concatStringsSep " && " bootCmds}
   '';
@@ -57,10 +57,11 @@ let
       }
     ];
 
-    sdImage.populateBootCommands = 
+    sdImage.createBootPartition = 
       let
         kernel = config.boot.kernelPackages.kernel;
       in ''
+        cp ${}
         cp ${kernel}/Image boot/
         cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb boot/
         cp ${config.system.build.toplevel}/initrd boot/initrd
