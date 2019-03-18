@@ -61,7 +61,6 @@ let
       let
         kernel = config.boot.kernelPackages.kernel;
       in ''
-        cp ${}
         cp ${kernel}/Image boot/
         cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb boot/
         cp ${config.system.build.toplevel}/initrd boot/initrd
