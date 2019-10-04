@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, nixos, ... }:
 
 {
   imports =
@@ -10,19 +10,20 @@
       ./hardware-configuration.nix
       ./mcbin.nix
           # Build config.system.build.sdImage
-      (import ./nixpkgs/nixos/modules/installer/cd-dvd/sd-image.nix)
+      (import ./nixpkgs/nixos/modules/installer/cd-dvd/sd-image-aarch64.nix)
     ];
 
-  # This value determines the NixOS release with which your system is to be
-  # compatible, in order to avoid breaking some software such as database
-  # servers. You should change this only after NixOS release notes say you
-  # should.
-  system.stateVersion = "18.09"; # Did you read the comment?
-
-  nixpkgs.crossSystem = {
+  /*nixpkgs.crossSystem = {
     config = "aarch64-unknown-linux-gnu";
     system = "aarch64-linux";
-  };
+  };*/
+  nixpkgs.crossSystem = 
+    let base = (import ./nixpkgs/lib).systems.examples.aarch64-multiplatform;
+    in 
+      base // {
+        platform = base.platform // { kernelTarget = "uImage"; };
+        system = "aarch64-linux";
+      };
   environment.noXlibs = true;
   fonts.fontconfig.enable = false;
   services.udisks2.enable = false;

@@ -24,23 +24,14 @@ let
 
   kernel = {
     nixpkgs.overlays = [ (self: super: {
-      btrfs-progs = super.btrfs-progs.override { python3 = null; };
       linux-marvell-armada = (import ./marvell-kernel.nix);
+      glibc = super.glibc.overrideAttrs (oldAttrs: {
+        patches = oldAttrs.patches ++ [ ./glibc-fix-nis.patch ];
+      });
     }) ];
+
     #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
-
-    boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux {
-      version = "5.0.0";
-      extraMeta.branch = "5.0";
-      kernelPatches = [];
-      src = pkgs.fetchFromGitHub {
-        owner = "torvalds";
-        repo = "linux";
-        rev = "1c163f4c7b3f621efff9b28a47abb36f7378d783";
-        sha256 = "1rzv1yfn8niib69dn6vpp24byck566a2fha48swd7ra20r0yhfgb";
-      };
-    });
-
+    boot.kernelPackages = pkgs.linuxPackages_5_2;
     boot.kernelPatches = [
       {
         name = "mbin-config";
@@ -57,14 +48,14 @@ let
       }
     ];
 
-    sdImage.createBootPartition = 
+    sdImage.populateFirmwareCommands = 
       let
         kernel = config.boot.kernelPackages.kernel;
       in ''
-        cp ${kernel}/Image boot/
-        cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb boot/
-        cp ${config.system.build.toplevel}/initrd boot/initrd
-        cat <<'EOF' >boot/uEnv.txt
+        cp ${kernel}/Image ./firmware
+        cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb ./firmware
+        cp ${config.system.build.toplevel}/initrd firmware/initrd
+        cat <<'EOF' >firmware/uEnv.txt
         ${uEnv}
         EOF
       '';
@@ -72,7 +63,7 @@ let
 
   bootloader =
     let
-      bootPart = "/boot";
+      bootPart = "/boot/firmware";
       deviceTree = "dtbs/marvell/armada-8040-mcbin.dtb";
     in {
       system.boot.loader.id = "u-boot";
