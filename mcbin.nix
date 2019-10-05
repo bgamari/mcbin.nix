@@ -45,6 +45,7 @@ let
       }
     ];
 
+    sdImage.firmwareSize = 128;
     sdImage.populateFirmwareCommands = 
       let
         kernel = config.boot.kernelPackages.kernel;
