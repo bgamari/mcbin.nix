@@ -25,9 +25,6 @@ let
   kernel = {
     nixpkgs.overlays = [ (self: super: {
       linux-marvell-armada = (import ./marvell-kernel.nix);
-      glibc = super.glibc.overrideAttrs (oldAttrs: {
-        patches = oldAttrs.patches ++ [ ./glibc-fix-nis.patch ];
-      });
     }) ];
 
     #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
