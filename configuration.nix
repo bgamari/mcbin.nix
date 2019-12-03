@@ -45,8 +45,12 @@
     p11-kit = super.p11-kit.overrideAttrs (oldAttrs: { doCheck = false; });
   }) ];
 
+  sound.enable = false;
+  hardware.enableAllFirmware = false;
+
   networking.hostName = "mbin";
   networking.useNetworkd = true;
+  networking.useDHCP = false;
   services.openssh.enable = true;
   services.avahi = {
     enable = true;
@@ -61,9 +65,9 @@
     neededForBoot = true;
   };
 
-  fileSystems."/nix" = {
-    device = "/mnt/ext/nix";
-    options = [ "bind" ];
-    neededForBoot = true;
-  };
+  #fileSystems."/nix" = {
+  #  device = "/mnt/ext/nix";
+  #  options = [ "bind" ];
+  #  neededForBoot = true;
+  #};
 }

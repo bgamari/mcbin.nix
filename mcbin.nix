@@ -14,9 +14,9 @@ let
   uEnv = ''
     toplevel=${config.system.build.toplevel}
     extra_kernel_args=
-    kernel_addr=0x2000000
+    kernel_addr=0x20000000
     kernel_image=Image
-    devicetree_addr=0x1000000
+    devicetree_addr=0x10000000
     devicetree_image=armada-8040-mcbin.dtb
     ramdisk_image=initrd
     bootcmd=${pkgs.lib.concatStringsSep " && " bootCmds}
@@ -28,12 +28,30 @@ let
     }) ];
 
     #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
-    boot.kernelPackages = pkgs.linuxPackages_5_2;
+    #boot.kernelPackages = pkgs.linuxPackages_5_2;
+    boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux rec {
+      version = "5.4-rc1";
+      modDirVersion = "5.4.0-rc1";
+      defconfig = "defconfig";
+      enableParallelBuilding = true;
+      extraConfig = "";
+      kernelPatches = [];
+      src = pkgs.fetchurl {
+        #url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
+        url = "https://git.kernel.org/torvalds/t/linux-${version}.tar.gz";
+        sha256 = "1a9h0g249b3aznn6jz92y5vpr02v921mgf72rj0nbblcfhrimzk9";
+      };
+    });
+
     boot.kernelPatches = [
       {
         name = "mbin-config";
         patch = null;
         extraConfig = ''
+          # Doesn't build
+          CRYPTO_AEGIS128_SIMD n
+
+          NF_TABLES_BRIDGE m
           MDIO_I2C y
           MVMDIO y
           OF_MDIO y
@@ -46,10 +64,21 @@ let
     ];
 
     sdImage.firmwareSize = 128;
+
     sdImage.populateFirmwareCommands = 
       let
         kernel = config.boot.kernelPackages.kernel;
       in ''
+        # Create a partition for BL1
+        echo "Installing BL1..."
+        sfdisk --append $img <<EOF
+            label: dos
+
+            start=4096, type=da
+        EOF
+        eval $(partx $img -o START,SECTORS --nr 3 --pairs)
+        dd conv=notrunc if=${pkgs.marvell-bl1}/flash-image.img of=$img seek=$START count=$SECTORS
+
         cp ${kernel}/Image ./firmware
         cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb ./firmware
         cp ${config.system.build.toplevel}/initrd firmware/initrd

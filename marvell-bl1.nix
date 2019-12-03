@@ -40,8 +40,11 @@ in stdenv.mkDerivation {
   hardeningDisable = [ "all" ];
   enableParallelBuilding = true;
   nativeBuildInputs = [ openssl ];
-  patches = [ ./atf-fix-openssl-includes.patch ];
-  postPatch = ''
+  patches = [
+    ./mv-ddr-fix-wrdata-warning.patch
+    ./atf-fix-openssl-includes.patch
+  ];
+  prePatch = ''
     # the mv_ddr build system tries to create mv_ddr_build_message.c
     chmod ugo+w ../ddr
     # move mv_ddr into place
