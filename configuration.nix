@@ -37,7 +37,7 @@
   users.users.root.initialHashedPassword = "";
 
   environment.systemPackages = with pkgs; [
-    vim ethtool
+    vim ethtool htop
   ];
 
   nixpkgs.overlays = [ (self: super: {
@@ -51,6 +51,17 @@
   networking.hostName = "mbin";
   networking.useNetworkd = true;
   networking.useDHCP = false;
+  systemd.network = {
+    networks."eth0" = {
+      matchConfig.Name = "eth0";
+      DHCP = "yes";
+    };
+    networks."eth2" = {
+      matchConfig.Name = "eth2";
+      DHCP = "yes";
+    };
+  };
+
   services.openssh.enable = true;
   services.avahi = {
     enable = true;

@@ -4,11 +4,10 @@ let
   bootCmds = [
     "echo Copying Linux from SD to RAM..."
     "mmc dev 1"
-    "ext4load mmc 1:1 \${kernel_addr} \${kernel_image}"
-    "ext4load mmc 1:1 \${devicetree_addr} \${devicetree_image}"
-    "ext4load mmc 1:1 \${ramdisk_addr} \${ramdisk_image}"
-    "setenv bootargs console=ttyS0,115200n8 root=/dev/mmcblk0p2 init=\${toplevel}/init \${extra_kernel_args}"
-    "bootm \${kernel_addr} \${devicetree_addr} \${ramdisk_addr}]"
+    "fatload mmc 1:1 \${kernel_addr} \${kernel_image}"
+    "fatload mmc 1:1 \${devicetree_addr} \${devicetree_image}"
+    "setenv bootargs console=ttyS0,115200n8 root=/dev/mmcblk1p2 init=\${toplevel}/init \${extra_kernel_args}"
+    "booti \${kernel_addr} - \${fdt_addr}"
   ];
 
   uEnv = ''
@@ -30,8 +29,8 @@ let
     #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
     #boot.kernelPackages = pkgs.linuxPackages_5_2;
     boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux rec {
-      version = "5.4-rc1";
-      modDirVersion = "5.4.0-rc1";
+      version = "5.4";
+      modDirVersion = "5.4.0";
       defconfig = "defconfig";
       enableParallelBuilding = true;
       extraConfig = "";
@@ -39,7 +38,7 @@ let
       src = pkgs.fetchurl {
         #url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
         url = "https://git.kernel.org/torvalds/t/linux-${version}.tar.gz";
-        sha256 = "1a9h0g249b3aznn6jz92y5vpr02v921mgf72rj0nbblcfhrimzk9";
+        sha256 = "07ckyzxridrf99m9i312l7j2c2rnhdbpvp7sck3rhwpbg9ifr402";
       };
     });
 
@@ -63,7 +62,9 @@ let
       }
     ];
 
-    sdImage.firmwareSize = 128;
+    sdImage.compressImage = false;
+
+    sdImage.firmwareSize = 256;
 
     sdImage.populateFirmwareCommands = 
       let
@@ -77,7 +78,9 @@ let
             start=4096, type=da
         EOF
         eval $(partx $img -o START,SECTORS --nr 3 --pairs)
-        dd conv=notrunc if=${pkgs.marvell-bl1}/flash-image.img of=$img seek=$START count=$SECTORS
+        echo $START, $SECTORS
+        dd conv=notrunc if=${pkgs.marvell-bl1}/flash-image.bin of=$img seek=$START
+        eval $(partx $img -o START,SECTORS --nr 1 --pairs)
 
         cp ${kernel}/Image ./firmware
         cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb ./firmware
