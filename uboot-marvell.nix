@@ -2,7 +2,7 @@
 
 buildUBoot rec {
   name = "uboot-marvell";
-  version = "2019.07";
+  version = "2019.10";
   defconfig = "mvebu_mcbin-88f8040_defconfig";
   targetPlatforms = [ "aarch64-linux" ];
   filesToInstall = [ "u-boot.bin" ];
@@ -14,7 +14,7 @@ buildUBoot rec {
 
   src = fetchurl {
     url = "ftp://ftp.denx.de/pub/u-boot/u-boot-${version}.tar.bz2";
-    sha256 = "1l2i0bavh83hcgl6wgjdpsqw2mm08ywwb90c0cf545ysx1vzmx5z";
+    sha256 = "053hcrwwlacqh2niisn0zas95zkbffw5aw5sdhixs8lmfdq60vcd";
   };
 
   /*
