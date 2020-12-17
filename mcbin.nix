@@ -2,10 +2,11 @@
 
 let
   bootCmds = [
+    "dhcp" # necessary otherwise eth2 doesn't come up
     "echo Copying Linux from SD to RAM..."
     "mmc dev 1"
     "fatload mmc 1:1 \${kernel_addr} \${kernel_image}"
-    "fatload mmc 1:1 \${devicetree_addr} \${devicetree_image}"
+    "fatload mmc 1:1 \${fdt_addr} \${fdt_name}"
     "setenv bootargs console=ttyS0,115200n8 root=/dev/mmcblk1p2 init=\${toplevel}/init \${extra_kernel_args}"
     "booti \${kernel_addr} - \${fdt_addr}"
   ];
@@ -15,8 +16,8 @@ let
     extra_kernel_args=
     kernel_addr=0x20000000
     kernel_image=Image
-    devicetree_addr=0x10000000
-    devicetree_image=armada-8040-mcbin.dtb
+    fdt_addr=0x10000000
+    fdt_image=armada-8040-mcbin.dtb
     ramdisk_image=initrd
     bootcmd=${pkgs.lib.concatStringsSep " && " bootCmds}
   '';
