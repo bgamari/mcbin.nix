@@ -6,11 +6,9 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      ./mcbin.nix
-          # Build config.system.build.sdImage
-      (import ./nixpkgs/nixos/modules/installer/cd-dvd/sd-image-aarch64.nix)
+    [ ./mcbin.nix
+      # Build config.system.build.sdImage
+      #(import ./nixpkgs/nixos/modules/installer/cd-dvd/sd-image-aarch64.nix)
     ];
 
   /*nixpkgs.crossSystem = {
@@ -18,17 +16,16 @@
     system = "aarch64-linux";
   };*/
   nixpkgs.crossSystem = 
-    let base = (import ./nixpkgs/lib).systems.examples.aarch64-multiplatform;
+    let base = lib.systems.examples.aarch64-multiplatform;
     in 
       base // {
-        platform = base.platform // { kernelTarget = "Image"; };
+        #platform = base.platform // { kernelTarget = "Image"; };
         system = "aarch64-linux";
       };
   boot.supportedFilesystems = lib.mkForce [ "ext4" "vfat" ];
   environment.noXlibs = true;
   fonts.fontconfig.enable = false;
   services.udisks2.enable = false;
-  security.rngd.enable = false;
   security.polkit.enable = false;
   documentation.enable = false;
   documentation.info.enable = false;

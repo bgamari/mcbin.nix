@@ -1,0 +1,13 @@
+diff --git a/include/lib/mmio.h b/include/lib/mmio.h
+index 38fdf0f2..c22f6a82 100644
+--- a/include/lib/mmio.h
++++ b/include/lib/mmio.h
+@@ -9,6 +9,8 @@
+ 
+ #include <stdint.h>
+ 
++#pragma GCC diagnostic ignored "-Warray-bounds"
++
+ static inline void mmio_write_8(uintptr_t addr, uint8_t value)
+ {
+ 	*(volatile uint8_t*)addr = value;

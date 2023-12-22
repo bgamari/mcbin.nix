@@ -1,4 +1,4 @@
-{pkgs, config, ...}: 
+{ lib, pkgs, config, ... }:
 
 let
   bootCmds = [
@@ -28,20 +28,20 @@ let
     }) ];
 
     #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
-    #boot.kernelPackages = pkgs.linuxPackages_5_2;
-    boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux rec {
-      version = "5.4";
-      modDirVersion = "5.4.0";
-      defconfig = "defconfig";
-      enableParallelBuilding = true;
-      extraConfig = "";
-      kernelPatches = [];
-      src = pkgs.fetchurl {
-        #url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
-        url = "https://git.kernel.org/torvalds/t/linux-${version}.tar.gz";
-        sha256 = "07ckyzxridrf99m9i312l7j2c2rnhdbpvp7sck3rhwpbg9ifr402";
-      };
-    });
+    boot.kernelPackages = pkgs.linuxPackages_6_6;
+    #boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux rec {
+    #  version = "5.4";
+    #  modDirVersion = "5.4.0";
+    #  defconfig = "defconfig";
+    #  enableParallelBuilding = true;
+    #  extraConfig = "";
+    #  kernelPatches = [];
+    #  src = pkgs.fetchurl {
+    #    #url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
+    #    url = "https://git.kernel.org/torvalds/t/linux-${version}.tar.gz";
+    #    sha256 = "07ckyzxridrf99m9i312l7j2c2rnhdbpvp7sck3rhwpbg9ifr402";
+    #  };
+    #});
 
     boot.kernelPatches = [
       {
@@ -102,12 +102,12 @@ let
       nixpkgs.overlays = [ (self: super: {
         uboot = self.callPackage ./uboot-marvell.nix {};
         uEnv = uEnv;
-        marvell-bl1 = self.callPackage ./marvell-bl1.nix {
+        marvell-bl1 = self.callPackage ./bl1 {
           ubootBin = "${self.uboot}/u-boot.bin";
         };
       }) ];
 
-      system.build.installBootLoader = pkgs.writeScript "update-uboot.sh" ''
+      system.build.installBootLoader = lib.mkForce (pkgs.writeScript "update-uboot.sh" ''
         #!${pkgs.stdenv.shell}
         toplevel=$1
         if [ ! -f $toplevel/init ]; then
@@ -130,7 +130,7 @@ let
         
         #${pkgs.ubootTools}/bin/fw_printenv || ( echo "Failed to print u-boot configuration"; exit 1 )
         #${pkgs.ubootTools}/bin/fw_setenv toplevel $toplevel
-      '';
+      '');
     };
 
 in {

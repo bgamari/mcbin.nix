@@ -1,0 +1,23 @@
+diff --git a/tools/fiptool/Makefile b/tools/fiptool/Makefile
+index fda7c7795..51d20e9c3 100644
+--- a/tools/fiptool/Makefile
++++ b/tools/fiptool/Makefile
+@@ -30,7 +30,6 @@ DEFINES += -DSTATIC=$(STATIC)
+ ifeq (${STATIC},1)
+ LDOPTS := -static
+ else
+-OPENSSL_DIR := /usr
+ 
+ # Select OpenSSL version flag according to the OpenSSL build selected
+ # from setting the OPENSSL_DIR path.
+@@ -46,8 +45,8 @@ DEFINES += -DUSING_OPENSSL3=$(USING_OPENSSL3)
+ # directory. However, for a local build of OpenSSL, the built binaries are
+ # located under the main project directory (i.e.: ${OPENSSL_DIR}, not
+ # ${OPENSSL_DIR}/lib/).
+-LDOPTS := -L${OPENSSL_DIR}/lib -L${OPENSSL_DIR} -lcrypto
+-INCLUDE_PATHS += -I${OPENSSL_DIR}/include
++LDOPTS := ${OPENSSL_LIBS} -lcrypto
++INCLUDE_PATHS += ${OPENSSL_INCLUDES}
+ endif # STATIC
+ 
+ HOSTCCFLAGS += ${DEFINES}
