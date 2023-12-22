@@ -7,21 +7,9 @@
 {
   imports =
     [ ./mcbin.nix
-      # Build config.system.build.sdImage
-      #(import ./nixpkgs/nixos/modules/installer/cd-dvd/sd-image-aarch64.nix)
     ];
 
-  /*nixpkgs.crossSystem = {
-    config = "aarch64-unknown-linux-gnu";
-    system = "aarch64-linux";
-  };*/
-  nixpkgs.crossSystem = 
-    let base = lib.systems.examples.aarch64-multiplatform;
-    in 
-      base // {
-        #platform = base.platform // { kernelTarget = "Image"; };
-        system = "aarch64-linux";
-      };
+  nixpkgs.crossSystem = lib.systems.examples.aarch64-multiplatform;
   boot.supportedFilesystems = lib.mkForce [ "ext4" "vfat" ];
   environment.noXlibs = true;
   fonts.fontconfig.enable = false;
@@ -36,11 +24,6 @@
   environment.systemPackages = with pkgs; [
     vim ethtool htop
   ];
-
-  nixpkgs.overlays = [ (self: super: {
-    # p11-kit testsuite is broken
-    p11-kit = super.p11-kit.overrideAttrs (oldAttrs: { doCheck = false; });
-  }) ];
 
   sound.enable = false;
   hardware.enableAllFirmware = false;
@@ -67,6 +50,9 @@
     publish.addresses = true;
     publish.domain = true;
   };
+
+  nix.settings.extra-experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.trusted-users = [ "root" "ben" ];
   
   fileSystems."/mnt/ext" = {
     device = "/dev/sda1";
