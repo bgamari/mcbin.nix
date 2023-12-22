@@ -1,0 +1,8 @@
+# MacchiatoBin NixOS image
+
+This is a NixOS image for the Marvell-based MacchiatoBin development board.
+
+Build using:
+```
+nix build .#nixosConfigurations.default.config.system.build.sdImage
+```
