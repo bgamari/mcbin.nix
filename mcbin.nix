@@ -2,7 +2,6 @@
 
 let
   bootCmds = [
-    "dhcp" # necessary otherwise eth2 doesn't come up
     "echo Copying Linux from SD to RAM..."
     "mmc dev 1"
     "fatload mmc 1:1 \${kernel_addr} \${kernel_image}"
