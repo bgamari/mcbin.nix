@@ -22,11 +22,6 @@ let
   '';
 
   kernel = {
-    nixpkgs.overlays = [ (self: super: {
-      linux-marvell-armada = (import ./marvell-kernel.nix);
-    }) ];
-
-    #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux-marvell-armada.4_4;
     boot.kernelPackages = pkgs.linuxPackages_6_6;
     #boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux rec {
     #  version = "5.4";
