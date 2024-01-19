@@ -7,7 +7,7 @@
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
-        "${nixpkgs}/nixos/modules/installer/cd-dvd/sd-image-aarch64.nix"
+        "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64-installer.nix"
       ];
     };
     packages.x86_64-linux.system = self.nixosConfigurations.default.config.system.build.toplevel;
