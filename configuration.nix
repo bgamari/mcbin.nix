@@ -57,7 +57,7 @@
   
   fileSystems."/mnt/ext" = {
     device = "/dev/sda1";
-    neededForBoot = true;
+    neededForBoot = false;
   };
 
   #fileSystems."/nix" = {
