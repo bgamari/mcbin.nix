@@ -60,11 +60,5 @@
     neededForBoot = false;
   };
 
-  #fileSystems."/nix" = {
-  #  device = "/mnt/ext/nix";
-  #  options = [ "bind" ];
-  #  neededForBoot = true;
-  #};
-
   system.stateVersion = "23.11";
 }
