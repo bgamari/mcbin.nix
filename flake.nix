@@ -11,5 +11,6 @@
       ];
     };
     packages.x86_64-linux.system = self.nixosConfigurations.default.config.system.build.toplevel;
+    packages.x86_64-linux.sd-image = self.nixosConfigurations.default.config.system.build.sdImage;
   };
 }
