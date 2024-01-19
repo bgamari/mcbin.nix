@@ -9,6 +9,12 @@
     [ ./mcbin.nix
     ];
 
+  nixpkgs.overlays = [
+    (self: super: {
+      linuxptp = super.linuxptp.overrideAttrs (oldAttrs: { makeFlags = oldAttrs.makeFlags ++ [ "CROSS_COMPILE=${self.stdenv.cc.targetPrefix}" ]; });
+    })
+  ];
+
   nixpkgs.crossSystem = lib.systems.examples.aarch64-multiplatform;
   boot.supportedFilesystems = lib.mkForce [ "ext4" "vfat" ];
   environment.noXlibs = true;
@@ -23,6 +29,7 @@
 
   environment.systemPackages = with pkgs; [
     vim ethtool htop
+    linuxptp
   ];
 
   sound.enable = false;
