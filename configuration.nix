@@ -42,6 +42,7 @@
     };
   };
 
+  services.journald.storage = "volatile";
   services.openssh.enable = true;
   services.avahi = {
     enable = true;
