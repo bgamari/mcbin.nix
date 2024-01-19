@@ -32,7 +32,7 @@ let
   bootloader = {
     hardware.deviceTree = {
       enable = true;
-      name = "dtbs/marvell/armada-8040-mcbin.dtb";
+      name = "marvell/armada-8040-mcbin.dtb";
     };
 
     boot.loader.grub.enable = false;
