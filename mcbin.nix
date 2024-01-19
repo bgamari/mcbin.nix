@@ -23,19 +23,6 @@ let
 
   kernel = {
     boot.kernelPackages = pkgs.linuxPackages_6_6;
-    #boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.buildLinux rec {
-    #  version = "5.4";
-    #  modDirVersion = "5.4.0";
-    #  defconfig = "defconfig";
-    #  enableParallelBuilding = true;
-    #  extraConfig = "";
-    #  kernelPatches = [];
-    #  src = pkgs.fetchurl {
-    #    #url = "mirror://kernel/linux/kernel/v5.x/linux-${version}.tar.xz";
-    #    url = "https://git.kernel.org/torvalds/t/linux-${version}.tar.gz";
-    #    sha256 = "07ckyzxridrf99m9i312l7j2c2rnhdbpvp7sck3rhwpbg9ifr402";
-    #  };
-    #});
 
     boot.kernelPatches = [
       {
