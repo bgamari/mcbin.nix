@@ -51,6 +51,7 @@ let
           OF_MDIO y
           PHY_MVEBU_CP110_COMPHY y
           MVPP2 y
+          MVPP2_PTP y
           SFP y
           MARVELL_10G y
         '';
