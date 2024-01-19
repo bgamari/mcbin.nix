@@ -8,6 +8,7 @@ buildUBoot rec {
   postConfigure = ''
     cat >> .config << EOF
     CONFIG_SYS_BOOTM_LEN=0x1000000000
+    CONFIG_DISTRO_DEFAULTS=n
     EOF
   '';
 }

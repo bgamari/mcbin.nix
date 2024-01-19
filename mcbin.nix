@@ -1,26 +1,6 @@
 { lib, pkgs, config, ... }:
 
 let
-  bootCmds = [
-    "echo Copying Linux from SD to RAM..."
-    "mmc dev 1"
-    "fatload mmc 1:1 \${kernel_addr} \${kernel_image}"
-    "fatload mmc 1:1 \${fdt_addr} \${fdt_name}"
-    "setenv bootargs console=ttyS0,115200n8 root=/dev/mmcblk1p2 init=\${toplevel}/init \${extra_kernel_args}"
-    "booti \${kernel_addr} - \${fdt_addr}"
-  ];
-
-  uEnv = ''
-    toplevel=${config.system.build.toplevel}
-    extra_kernel_args=
-    kernel_addr=0x20000000
-    kernel_image=Image
-    fdt_addr=0x10000000
-    fdt_image=armada-8040-mcbin.dtb
-    ramdisk_image=initrd
-    bootcmd=${pkgs.lib.concatStringsSep " && " bootCmds}
-  '';
-
   kernel = {
     boot.kernelPackages = pkgs.linuxPackages_6_6;
 
@@ -46,75 +26,42 @@ let
     ];
 
     sdImage.compressImage = false;
-
-    sdImage.firmwareSize = 256;
-
-    sdImage.populateFirmwareCommands = 
-      let
-        kernel = config.boot.kernelPackages.kernel;
-      in ''
-        # Create a partition for BL1
-        echo "Installing BL1..."
-        sfdisk --append $img <<EOF
-            label: dos
-
-            start=4096, type=da
-        EOF
-        eval $(partx $img -o START,SECTORS --nr 3 --pairs)
-        echo $START, $SECTORS
-        dd conv=notrunc if=${pkgs.marvell-bl1}/flash-image.bin of=$img seek=$START
-        eval $(partx $img -o START,SECTORS --nr 1 --pairs)
-
-        cp ${kernel}/Image ./firmware
-        cp ${kernel}/dtbs/marvell/armada-8040-mcbin.dtb ./firmware
-        cp ${config.system.build.toplevel}/initrd firmware/initrd
-        cat <<'EOF' >firmware/uEnv.txt
-        ${uEnv}
-        EOF
-      '';
+    services.journald.storage = "volatile";
   };
 
-  bootloader =
-    let
-      bootPart = "/boot/firmware";
-      deviceTree = "dtbs/marvell/armada-8040-mcbin.dtb";
-    in {
-      system.boot.loader.id = "u-boot";
-      boot.loader.grub.enable = false;
-      nixpkgs.overlays = [ (self: super: {
-        uboot = self.callPackage ./uboot-marvell.nix {};
-        uEnv = uEnv;
-        marvell-bl1 = self.callPackage ./bl1 {
-          ubootBin = "${self.uboot}/u-boot.bin";
-        };
-      }) ];
-
-      system.build.installBootLoader = lib.mkForce (pkgs.writeScript "update-uboot.sh" ''
-        #!${pkgs.stdenv.shell}
-        toplevel=$1
-        if [ ! -f $toplevel/init ]; then
-          echo "Invalid toplevel; expected to find /init"
-          exit 1
-        fi
-
-        archive() {
-          if [ -f $1 ]; then mv $1 $1.old; fi
-        }
-
-        archive ${bootPart}/kernel
-        archive ${bootPart}/initrd
-        archive ${bootPart}/devicetree.dtb
-
-        cp -L $toplevel/kernel ${bootPart}/kernel
-        cp -L $toplevel/${deviceTree} ${bootPart}/devicetree.dtb
-	      ${pkgs.ubootTools}/bin/mkimage -A arm64 -O linux -T ramdisk -C gzip -d $toplevel/initrd ${bootPart}/initrd
-        echo "Bootloader updated."
-        
-        #${pkgs.ubootTools}/bin/fw_printenv || ( echo "Failed to print u-boot configuration"; exit 1 )
-        #${pkgs.ubootTools}/bin/fw_setenv toplevel $toplevel
-      '');
+  bootloader = {
+    hardware.deviceTree = {
+      enable = true;
+      name = "dtbs/marvell/armada-8040-mcbin.dtb";
     };
 
+    boot.loader.grub.enable = false;
+    nixpkgs.overlays = [ (self: super: {
+      uboot = self.callPackage ./uboot-marvell.nix {};
+      marvell-bl1 = self.callPackage ./bl1 {
+        ubootBin = "${self.uboot}/u-boot.bin";
+      };
+    }) ];
+
+    sdImage.firmwareSize = 256;
+    sdImage.populateFirmwareCommands = ''
+      # Create a partition for BL1
+      echo "Installing BL1..."
+      sfdisk --append $img <<EOF
+          label: dos
+
+          start=4096, type=da
+      EOF
+      eval $(partx $img -o START,SECTORS --nr 3 --pairs)
+      echo $START, $SECTORS
+      dd conv=notrunc if=${pkgs.marvell-bl1}/flash-image.bin of=$img seek=$START
+      eval $(partx $img -o START,SECTORS --nr 1 --pairs)
+    '';
+  };
+
 in {
-  imports = [ bootloader kernel ];
+  imports = [
+    bootloader
+    kernel
+  ];
 }
