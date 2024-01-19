@@ -28,7 +28,7 @@ let
     owner = "MarvellEmbeddedProcessors";
     repo = "mv-ddr-marvell";
     rev = "bfcf62051be835f725005bb5137928f7c27b792e";
-    sha256 = "sha256-ikAUTTlvSeyOqcMpwegD62z/SoM6A63iEFkxDUxiT3I=";
+    hash = "sha256-6+ioAhYs005o1SgJEurzTkZSNd7c06gdL9Lm8I5VcZ4=";
     leaveDotGit = true;
   };
 
